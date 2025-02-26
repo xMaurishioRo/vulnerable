@@ -50,13 +50,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (isset($_POST['logout'])) {
         session_destroy();
-        header("Location: index.php");
+        header("Location: app/index.php");
         exit();
     }
 }
 ?>
 <html lang="en">
-
+<link rel="icon" type="image/x-icon" href="/images/2165674.png">
 <head>
     <meta charset="UTF-8">
     <title>ÑO</title>

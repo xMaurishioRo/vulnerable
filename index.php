@@ -1,6 +1,6 @@
 <?php
 session_start();
-ob_start();
+ob_start(); // Inicia el buffer de salida
 
 $servername = "bdatahgyey2fmuqqzysf-mysql.services.clever-cloud.com"; 
 $username = "ugb4sst7ni1x6mnn";
@@ -13,12 +13,9 @@ $conn = new mysqli($servername, $username, $password, $database);
 // Verificar conexión
 if ($conn->connect_error) {
     die("Conexión fallida: " . $conn->connect_error);
-}else{
-    echo "Conexión exitosa";
 }
 
-
-
+// Crear tablas si no existen
 $conn->query("CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
@@ -30,6 +27,7 @@ $conn->query("CREATE TABLE IF NOT EXISTS comments (
     comment TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 )");
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['register'])) {
         $user = $_POST['username'];
@@ -55,7 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 }
-ob_end_flush();
+
+ob_end_flush(); // Envía el buffer de salida
 ?>
 <html lang="en">
         <head>

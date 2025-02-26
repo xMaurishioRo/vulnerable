@@ -54,6 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 }
+
+ob_end_flush();
 ?>
 <html lang="en">
         <head>

@@ -13,9 +13,10 @@ $conn = new mysqli($servername, $username, $password, $database);
 // Verificar conexión
 if ($conn->connect_error) {
     die("Conexión fallida: " . $conn->connect_error);
+}else{
+    echo "Conexión exitosa";
 }
 
-// echo "Conexión exitosa";
 
 
 $conn->query("CREATE TABLE IF NOT EXISTS users (
@@ -54,7 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 }
-
 ob_end_flush();
 ?>
 <html lang="en">

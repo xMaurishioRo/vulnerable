@@ -1,5 +1,6 @@
 <?php
 session_start();
+ob_start();
 
 $servername = "bdatahgyey2fmuqqzysf-mysql.services.clever-cloud.com"; 
 $username = "ugb4sst7ni1x6mnn";

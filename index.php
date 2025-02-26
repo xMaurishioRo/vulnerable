@@ -50,18 +50,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (isset($_POST['logout'])) {
         session_destroy();
-        header("Location: app/index.php");
+        header("Location: ./index.php");
         exit();
     }
 }
 ?>
 <html lang="en">
-<link rel="icon" type="image/x-icon" href="/images/2165674.png">
-<head>
-    <meta charset="UTF-8">
-    <title>ÑO</title>
-
-    <style>
+        <head>
+        <meta charset="UTF-8">
+        <title>ÑO</title>
+        
+        <style>
         @import url(https://fonts.googleapis.com/css?family=Share+Tech+Mono);
 
         .image-replacement {

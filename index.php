@@ -15,7 +15,7 @@ if ($conn->connect_error) {
     die("Conexión fallida: " . $conn->connect_error);
 }
 
-echo "Conexión exitosa";
+// echo "Conexión exitosa";
 
 
 $conn->query("CREATE TABLE IF NOT EXISTS users (
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (isset($_POST['logout'])) {
         session_destroy();
-        header("Location: https://vulnerable-production.up.railway.app/");
+        header("Location: index.php");
         exit();
     }
 }

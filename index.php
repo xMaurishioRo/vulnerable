@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (isset($_POST['logout'])) {
         session_destroy();
-        header("Location: xMaurishioRo/vulnerable/index.php");
+        header("Location: https://vulnerable-production.up.railway.app/");
         exit();
     }
 }

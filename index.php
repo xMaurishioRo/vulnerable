@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (isset($_POST['logout'])) {
         session_destroy();
-        header("Location: index.php");
+        header("Location: /index.php");
         exit();
     }
 }
@@ -70,14 +70,10 @@ ob_end_flush();
             white-space: nowrap;
             overflow: hidden
         }
-
         span.amp {
             font-family: Baskerville, 'Goudy Old Style', Palatino, 'Book Antiqua', serif !important;
             font-style: italic
         }
-
-
-
         body,
         html {
             margin: 0;

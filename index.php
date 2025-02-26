@@ -1,11 +1,11 @@
 <?php
 session_start();
-ob_start(); // Inicia el buffer de salida
+ob_start();
 
-$servername = "bdatahgyey2fmuqqzysf-mysql.services.clever-cloud.com"; 
+$servername = "bdatahgyey2fmuqqzysf-mysql.services.clever-cloud.com";
 $username = "ugb4sst7ni1x6mnn";
-$password = "XUGVtJC9X7DkbHiNMKhi"; 
-$database = "bdatahgyey2fmuqqzysf"; 
+$password = "XUGVtJC9X7DkbHiNMKhi";
+$database = "bdatahgyey2fmuqqzysf";
 
 // Crear conexión
 $conn = new mysqli($servername, $username, $password, $database);
@@ -54,14 +54,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-ob_end_flush(); // Envía el buffer de salida
+ob_end_flush();
 ?>
 <html lang="en">
-        <head>
-        <meta charset="UTF-8">
-        <title>ÑO</title>
-        
-        <style>
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="/images/2165674.png">
+    <title>ÑO</title>
+
+    <style>
         @import url(https://fonts.googleapis.com/css?family=Share+Tech+Mono);
 
         .image-replacement {
@@ -861,26 +862,16 @@ ob_end_flush(); // Envía el buffer de salida
     </style>
 
     <script>
-        window.console = window.console || function(t) {};
+        window.console = window.console || function (t) { };
     </script>
-
-
-
 </head>
-
 <body translate="no" class="">
-
-
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="icon" type="image/x-icon" href="/images/2165674.png">
     <title>cyberpunk - terminal</title>
     <!-- <link rel="stylesheet" href="css/term.css"> -->
-
-
-
     <div class="container on">
         <div class="screen">
             <h3 class="title">
@@ -891,10 +882,6 @@ ob_end_flush(); // Envía el buffer de salida
                     <div class="box--inner">
                         <div class="content">
                             <div class="holder">
-
-
-
-
                                 <?php if (isset($_SESSION['user'])): ?>
                                     <b>GG papá</b>
                                     <br>
@@ -909,10 +896,13 @@ ob_end_flush(); // Envía el buffer de salida
                                         <button type="submit" name="comment_submit" id="comment">Submit</button>
                                     </form>
                                     <form method="POST">
-                                        <button type="submit" name="logout" style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">Logout</button>
+                                        <button type="submit" name="logout"
+                                            style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">Logout</button>
                                     </form>
                                     <form method="POST">
-                                        <button type="submit" name="view_comments" style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">View My Comments</button>
+                                        <button type="submit" name="view_comments"
+                                            style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">View
+                                            My Comments</button>
                                     </form>
 
                                     <?php
@@ -935,7 +925,8 @@ ob_end_flush(); // Envía el buffer de salida
                                     <br>
                                     <br>
                                     <div class="row">
-                                        <button type="button" id="toggleButton" style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">[[Register]]</button>
+                                        <button type="button" id="toggleButton"
+                                            style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">[[Register]]</button>
                                     </div>
 
                                     <form method="post" id="authForm">
@@ -944,7 +935,8 @@ ob_end_flush(); // Envía el buffer de salida
                                                 Username
                                             </div>
                                             <div class="col col__center">
-                                                <input type="text" id="login" name="username" maxlength="32" required="required" placeholder="" autocomplete="username">
+                                                <input type="text" id="login" name="username" maxlength="32"
+                                                    required="required" placeholder="" autocomplete="username">
                                             </div>
                                         </div>
                                         <div class="row">
@@ -952,7 +944,9 @@ ob_end_flush(); // Envía el buffer de salida
                                                 Password
                                             </div>
                                             <div class="col col__center">
-                                                <input type="password" id="password" name="password" required="required" placeholder="" data-error="" maxlength="32" autocomplete="new-password" autofocus="true">
+                                                <input type="password" id="password" name="password" required="required"
+                                                    placeholder="" data-error="" maxlength="32" autocomplete="new-password"
+                                                    autofocus="true">
                                             </div>
                                         </div>
                                         <div class="row">
@@ -960,7 +954,7 @@ ob_end_flush(); // Envía el buffer de salida
                                         </div>
                                     </form>
                                     <script>
-                                        document.getElementById('toggleButton').addEventListener('click', function() {
+                                        document.getElementById('toggleButton').addEventListener('click', function () {
                                             var submitButton = document.getElementById('submitButton');
                                             var authForm = document.getElementById('authForm');
                                             if (submitButton.name === 'login') {
@@ -975,8 +969,6 @@ ob_end_flush(); // Envía el buffer de salida
                                         });
                                     </script>
                                 <?php endif; ?>
-
-
                             </div>
                         </div>
                     </div>
@@ -984,16 +976,5 @@ ob_end_flush(); // Envía el buffer de salida
             </div>
         </div>
     </div>
-
-
-
-
-
-
-
-
-
-
 </body>
-
 </html>

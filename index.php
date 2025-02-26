@@ -29,7 +29,6 @@ $conn->query("CREATE TABLE IF NOT EXISTS comments (
     comment TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 )");
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['register'])) {
         $user = $_POST['username'];

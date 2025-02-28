@@ -4,7 +4,7 @@ session_set_cookie_params([
     'lifetime' => 1800,
     'path' => '/',
     'domain' => 'vulnerable-production.up.railway.app', // Cambia esto por tu dominio
-    'secure' => isset($_SERVER['HTTPS']),
+    'secure' => isset($_SERVER['HTTP']),
     'httponly' => false,
     'samesite' => 'Strict'
 ]);

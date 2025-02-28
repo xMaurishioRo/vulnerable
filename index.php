@@ -1,9 +1,9 @@
 <?php
-// Configuración segura de cookies de sesión
+// Configuración segura de cookies de sesión -- ¡ACTIVA ESTO MAUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU!
 session_set_cookie_params([
     'lifetime' => 1800,
     'path' => '/',
-    'domain' => 'vulnerable-production.up.railway.app', // Cambia esto por tu dominio
+    'domain' => 'vulnerable-production.up.railway.app', // Cambia esto por tu dominioo
     'secure' => isset($_SERVER['HTTPS']),
     'httponly' => false,
     'samesite' => 'Strict'
@@ -45,6 +45,9 @@ function validatePassword($password)
 
 // Verificación del token CSRF
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // echo "Token CSRF enviado: " . $_POST['csrf_token'] . "<br>";
+    // echo "Token CSRF en sesión: " . $_SESSION['csrf_token'] . "<br>";
+
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         die("CSRF token inválido.");
     }
@@ -103,12 +106,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
             $stmt = $conn->prepare("UPDATE users SET login_attempts = 0, last_login_attempt = NULL WHERE id = ?");
             $stmt->bind_param('i', $result['id']);
             $stmt->execute();
-            echo "Inicio de sesión exitoso.";
-        } else {
             $stmt = $conn->prepare("UPDATE users SET login_attempts = login_attempts + 1, last_login_attempt = NOW() WHERE id = ?");
             $stmt->bind_param('i', $result['id']);
             $stmt->execute();
-            echo "Credenciales incorrectas.";
+            echo "Inicio de sesión exitoso.";
         }
     } else {
         echo "Credenciales incorrectas.";
@@ -154,7 +155,6 @@ OB_end_flush();
 ?>
 
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/x-icon" href="/images/2165674.png">
@@ -958,62 +958,93 @@ OB_end_flush();
             background: #000;
         }
     </style>
+
     <script>
         window.console = window.console || function (t) { };
     </script>
 </head>
 <body translate="no" class="">
     <div class="container on">
-        <?php if (isset($_SESSION['user'])): ?>
-            <form method="POST">
-                <button type="submit" name="logout">Logout</button>
-            </form>
-            <form method="POST">
-                <button type="submit" name="view_comments">My Comments</button>
-            </form>
-        <?php else: ?>
-            <b>Welcome</b> — Please enter your credentials to access the system.
-            <br><br>
-            <div class="row">
-                <button type="button" id="toggleButton">[[Register]]</button>
+        <div class="screen">
+            <h3 class="title">CONNECTION ESTABLISHED</h3>
+            <div class="box--outer">
+                <div class="box">
+                    <div class="box--inner">
+                        <div class="content">
+                            <div class="holder">
+                                <?php if (isset($_SESSION['user'])): ?>
+                                    <b>GG papá</b>
+                                    <br>
+                                    <br>
+                                    <form method="POST">
+                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
+
+                                        <div class="col col__left label">Comments</div>
+                                        <div class="col col__center">
+                                            <input type="text" name="comment" id="commets" placeholder=" ">
+                                        </div>
+                                        <button type="submit" name="comment_submit" id="comment">Submit</button>
+                                    </form>
+                                    <form method="POST">
+                                        <button type="submit" name="logout"
+                                            style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">Logout</button>
+                                    </form>
+                                    <form method="POST">
+                                        <button type="submit" name="view_comments"
+                                            style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">View
+                                            My Comments</button>
+                                    </form>
+                                <?php else: ?>
+                                    <b>Welcome</b> — Please enter your credentials to access the system.
+                                    <br>
+                                    <br>
+                                    <div class="row">
+                                        <button type="button" id="toggleButton"
+                                            style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">[[Register]]</button>
+                                    </div>
+                                    <form method="POST" id="authForm">
+                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
+                                        <div class="row">
+                                            <div class="col col__left label">Username</div>
+                                            <div class="col col__center">
+                                                <input type="text" id="login" name="username" maxlength="32"
+                                                    required="required" placeholder="" autocomplete="username">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col col__left label">Password</div>
+                                            <div class="col col__center">
+                                                <input type="password" id="password" name="password" required="required"
+                                                    placeholder="" data-error="" maxlength="32" autocomplete="new-password"
+                                                    autofocus="true">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <button type="submit" id="submitButton" name="login">[Login]</button>
+                                        </div>
+                                    </form>
+                                    <script>
+                                        document.getElementById('toggleButton').addEventListener('click', function () {
+                                            var submitButton = document.getElementById('submitButton');
+                                            var authForm = document.getElementById('authForm');
+                                            if (submitButton.name === 'login') {
+                                                submitButton.name = 'register';
+                                                submitButton.textContent = '[Register]';
+                                                this.textContent = 'Login';
+                                            } else {
+                                                submitButton.name = 'login';
+                                                submitButton.textContent = '[Login]';
+                                                this.textContent = 'Register';
+                                            }
+                                        });
+                                    </script>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <form method="POST" id="authForm">
-                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
-                <div class="row">
-                    <div class="col col__left label">Username</div>
-                    <div class="col col__center">
-                        <input type="text" id="login" name="username" maxlength="32" required="required"
-                            autocomplete="username">
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col col__left label">Password</div>
-                    <div class="col col__center">
-                        <input type="password" id="password" name="password" required="required" maxlength="32"
-                            autocomplete="new-password" autofocus="true">
-                    </div>
-                </div>
-                <div class="row">
-                    <button type="submit" id="submitButton" name="login">[Login]</button>
-                </div>
-            </form>
-            <script>
-                document.getElementById('toggleButton').addEventListener('click', function () {
-                    var submitButton = document.getElementById('submitButton');
-                    var authForm = document.getElementById('authForm');
-                    if (submitButton.name === 'login') {
-                        submitButton.name = 'register';
-                        submitButton.textContent = '[Register]';
-                        this.textContent = 'Login';
-                    } else {
-                        submitButton.name = 'login';
-                        submitButton.textContent = '[Login]';
-                        this.textContent = 'Register';
-                    }
-                });
-            </script>
-        <?php endif; ?>
+        </div>
     </div>
 </body>
-
 </html>

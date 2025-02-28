@@ -1,65 +1,168 @@
 <?php
 session_start();
-ob_start();
+OB_start();
+require 'conf.php';
 
-$servername = "bdatahgyey2fmuqqzysf-mysql.services.clever-cloud.com";
-$username = "ugb4sst7ni1x6mnn";
-$password = "XUGVtJC9X7DkbHiNMKhi";
-$database = "bdatahgyey2fmuqqzysf";
+// Configuración segura de cookies de sesión -- ¡ACTIVA ESTO MAUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU!
+session_set_cookie_params([
+    'lifetime' => 1800,
+    'path' => '/',
+    'domain' => 'vulnerable-production.up.railway.app', // Cambia esto por tu dominio
+    'secure' => isset($_SERVER['HTTPS']),
+    'httponly' => false,
+    'samesite' => 'Strict'
+]);
 
-// Crear conexión
-$conn = new mysqli($servername, $username, $password, $database);
+// Regenerar el ID de sesión para evitar session fixation
+session_regenerate_id(true);
 
-// Verificar conexión
-if ($conn->connect_error) {
-    die("Conexión fallida: " . $conn->connect_error);
+// Función para hashear contraseñas
+function hashPassword($password)
+{
+    return password_hash($password, PASSWORD_BCRYPT);
 }
 
-// Crear tablas si no existen
-$conn->query("CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
-)");
-$conn->query("CREATE TABLE IF NOT EXISTS comments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    comment TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-)");
+// Función para sanitizar y validar entradas
+function cleanInput($input)
+{
+    $input = trim($input);
+    $input = strip_tags($input);
+    $input = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
+    return $input;
+}
 
+// Validación de nombre de usuario
+function validateUsername($username)
+{
+    return preg_match('/^[a-zA-Z0-9_]{3,32}$/', $username);
+}
+
+// Validación de contraseña
+function validatePassword($password)
+{
+    return strlen($password) >= 8 && strlen($password) <= 32;
+}
+
+// Verificación del token CSRF
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['register'])) {
-        $user = $_POST['username'];
-        $pass = $_POST['password'];
-        $conn->query("INSERT INTO users (username, password) VALUES ('$user', '$pass')");
-    }
-    if (isset($_POST['login'])) {
-        $user = $_POST['username'];
-        $pass = $_POST['password'];
-        $result = $conn->query("SELECT * FROM users WHERE username = '$user' AND password = '$pass'");
-        if ($result->num_rows > 0) {
-            $_SESSION['user'] = $user;
-        }
-    }
-    if (isset($_POST['comment']) && isset($_SESSION['user'])) {
-        $comment = $_POST['comment'];
-        $user_id = $conn->query("SELECT id FROM users WHERE username = '{$_SESSION['user']}'")->fetch_assoc()['id'];
-        $conn->query("INSERT INTO comments (user_id, comment) VALUES ('$user_id', '$comment')");
-    }
-    if (isset($_POST['logout'])) {
-        session_destroy();
-        header("Location: /index.php");
-        exit();
+    // echo "Token CSRF enviado: " . $_POST['csrf_token'] . "<br>";
+    // echo "Token CSRF en sesión: " . $_SESSION['csrf_token'] . "<br>";
+
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        die("CSRF token inválido.");
     }
 }
 
-ob_end_flush();
+
+// Generar un nuevo token CSRF si no existe
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Registro de usuario
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
+    $user = cleanInput($_POST['username']);
+    $pass = cleanInput($_POST['password']);
+
+    if (validateUsername($user)) {
+        if (validatePassword($pass)) {
+            $stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
+            $stmt->bind_param('s', $user);
+            $stmt->execute();
+            $stmt->store_result();
+
+            if ($stmt->num_rows > 0) {
+                echo "El nombre de usuario ya existe.";
+            } else {
+                $pass = hashPassword($pass);
+                $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+                $stmt->bind_param('ss', $user, $pass);
+                $stmt->execute();
+                echo "Registro exitoso.";
+            }
+        } else {
+            echo("Contraseña no válida.");
+        }
+    } else {
+        echo("Nombre de usuario no válido.");
+    }
+    
+    
+
+    
+}
+
+// Inicio de sesión
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
+    $user = cleanInput($_POST['username']);
+    $stmt = $conn->prepare("SELECT id, password, login_attempts, last_login_attempt FROM users WHERE username = ?");
+    $stmt->bind_param('s', $user);
+    $stmt->execute();
+    $result = $stmt->get_result()->fetch_assoc();
+
+    if ($result) {
+        if ($result['login_attempts'] >= 5 && (time() - strtotime($result['last_login_attempt'])) < 300) {
+            die("Demasiados intentos fallidos. Inténtelo de nuevo en 5 minutos.");
+        }
+
+        if (password_verify($_POST['password'], $result['password'])) {
+            $_SESSION['user_id'] = $result['id'];
+            $_SESSION['user'] = $user;
+            $stmt = $conn->prepare("UPDATE users SET login_attempts = 0, last_login_attempt = NULL WHERE id = ?");
+            $stmt->bind_param('i', $result['id']);
+            $stmt->execute();
+            $stmt = $conn->prepare("UPDATE users SET login_attempts = login_attempts + 1, last_login_attempt = NOW() WHERE id = ?");
+            $stmt->bind_param('i', $result['id']);
+            $stmt->execute();
+            echo "Inicio de sesión exitoso.";
+            
+        }
+    } else {
+        echo "Credenciales incorrectas.";
+    }
+}
+
+// Cerrar sesión
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
+    session_destroy();
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+// Enviar comentario
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment_submit'])) {
+    $comment = cleanInput($_POST['comment']);
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("INSERT INTO comments (user_id, comment) VALUES (?, ?)");
+    $stmt->bind_param('is', $user_id, $comment);
+    $stmt->execute();
+    echo "Comentario enviado.";
+}
+
+// Ver comentarios
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['view_comments'])) {
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT comment FROM comments WHERE user_id = ?");
+    $stmt->bind_param('i', $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+    if ($result) {
+        echo "<script>alert('";
+        foreach ($result as $row) {
+            echo htmlspecialchars($row['comment']) . "\\n";
+        }
+        echo "');</script>";
+    } else {
+        echo "<script>alert('No hay comentarios.');</script>";
+    }
+}
+OB_end_flush();
 ?>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/x-icon" href="/images/2165674.png">
     <title>ÑO</title>
 
     <style>
@@ -70,10 +173,14 @@ ob_end_flush();
             white-space: nowrap;
             overflow: hidden
         }
+
         span.amp {
             font-family: Baskerville, 'Goudy Old Style', Palatino, 'Book Antiqua', serif !important;
             font-style: italic
         }
+
+
+
         body,
         html {
             margin: 0;
@@ -858,21 +965,17 @@ ob_end_flush();
     </style>
 
     <script>
-        window.console = window.console || function (t) { };
+        window.console = window.console || function(t) {};
     </script>
+
+
+
 </head>
+
 <body translate="no" class="">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="icon" type="image/x-icon" href="/images/2165674.png">
-    <title>cyberpunk - terminal</title>
-    <!-- <link rel="stylesheet" href="css/term.css"> -->
     <div class="container on">
         <div class="screen">
-            <h3 class="title">
-                CONNECTION ESTABLISHED
-            </h3>
+            <h3 class="title">CONNECTION ESTABLISHED</h3>
             <div class="box--outer">
                 <div class="box">
                     <div class="box--inner">
@@ -883,66 +986,39 @@ ob_end_flush();
                                     <br>
                                     <br>
                                     <form method="POST">
-                                        <div class="col col__left label">
-                                            Comments
-                                        </div>
+                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
+
+                                        <div class="col col__left label">Comments</div>
                                         <div class="col col__center">
                                             <input type="text" name="comment" id="commets" placeholder=" ">
                                         </div>
                                         <button type="submit" name="comment_submit" id="comment">Submit</button>
                                     </form>
                                     <form method="POST">
-                                        <button type="submit" name="logout"
-                                            style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">Logout</button>
+                                        <button type="submit" name="logout" style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">Logout</button>
                                     </form>
                                     <form method="POST">
-                                        <button type="submit" name="view_comments"
-                                            style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">View
-                                            My Comments</button>
+                                        <button type="submit" name="view_comments" style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">View My Comments</button>
                                     </form>
-
-                                    <?php
-                                    if (isset($_POST['view_comments'])) {
-                                        $user_id = $conn->query("SELECT id FROM users WHERE username = '{$_SESSION['user']}'")->fetch_assoc()['id'];
-                                        $result = $conn->query("SELECT comment FROM comments WHERE user_id = '$user_id'");
-                                        if ($result->num_rows > 0) {
-                                            echo "<script>alert('";
-                                            while ($row = $result->fetch_assoc()) {
-                                                echo htmlspecialchars($row['comment']) . "\\n";
-                                            }
-                                            echo "');</script>";
-                                        } else {
-                                            echo "<script>alert('burro ni haz guardado nada.');</script>";
-                                        }
-                                    }
-                                    ?>
                                 <?php else: ?>
                                     <b>Welcome</b> — Please enter your credentials to access the system.
                                     <br>
                                     <br>
                                     <div class="row">
-                                        <button type="button" id="toggleButton"
-                                            style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">[[Register]]</button>
+                                        <button type="button" id="toggleButton" style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">[[Register]]</button>
                                     </div>
-
                                     <form method="post" id="authForm">
+                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
                                         <div class="row">
-                                            <div class="col col__left label">
-                                                Username
-                                            </div>
+                                            <div class="col col__left label">Username</div>
                                             <div class="col col__center">
-                                                <input type="text" id="login" name="username" maxlength="32"
-                                                    required="required" placeholder="" autocomplete="username">
+                                                <input type="text" id="login" name="username" maxlength="32" required="required" placeholder="" autocomplete="username">
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col col__left label">
-                                                Password
-                                            </div>
+                                            <div class="col col__left label">Password</div>
                                             <div class="col col__center">
-                                                <input type="password" id="password" name="password" required="required"
-                                                    placeholder="" data-error="" maxlength="32" autocomplete="new-password"
-                                                    autofocus="true">
+                                                <input type="password" id="password" name="password" required="required" placeholder="" data-error="" maxlength="32" autocomplete="new-password" autofocus="true">
                                             </div>
                                         </div>
                                         <div class="row">
@@ -950,7 +1026,7 @@ ob_end_flush();
                                         </div>
                                     </form>
                                     <script>
-                                        document.getElementById('toggleButton').addEventListener('click', function () {
+                                        document.getElementById('toggleButton').addEventListener('click', function() {
                                             var submitButton = document.getElementById('submitButton');
                                             var authForm = document.getElementById('authForm');
                                             if (submitButton.name === 'login') {
@@ -973,4 +1049,5 @@ ob_end_flush();
         </div>
     </div>
 </body>
+
 </html>

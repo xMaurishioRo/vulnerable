@@ -1,6 +1,6 @@
 <?php
-session_start();
-OB_start();
+// session_start();
+// OB_start();
 require 'conf.php';
 
 // Configuración segura de cookies de sesión
@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['view_comments'])) {
         echo "<script>alert('No hay comentarios.');</script>";
     }
 }
-OB_end_flush();
+// OB_end_flush();
 ?>
 <html lang="en">
 

@@ -155,7 +155,6 @@ OB_end_flush();
 ?>
 
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/x-icon" href="/images/2165674.png">
@@ -449,7 +448,7 @@ OB_end_flush();
             .box::before {
                 width: 22px;
                 /* background: url(ver-line-mobile.png) no-repeat center; */
-                background-color: yellow no-repeat center;
+                background-color: yellow  no-repeat center;
                 background-size: contain
             }
 
@@ -964,7 +963,6 @@ OB_end_flush();
         window.console = window.console || function (t) { };
     </script>
 </head>
-
 <body translate="no" class="">
     <div class="container on">
         <div class="screen">
@@ -1010,14 +1008,15 @@ OB_end_flush();
                                             <div class="col col__left label">Username</div>
                                             <div class="col col__center">
                                                 <input type="text" id="login" name="username" maxlength="32"
-                                                    required="required" autocomplete="username">
+                                                    required="required" placeholder="" autocomplete="username">
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col col__left label">Password</div>
                                             <div class="col col__center">
                                                 <input type="password" id="password" name="password" required="required"
-                                                    maxlength="32" autocomplete="new-password" autofocus="true">
+                                                    placeholder="" data-error="" maxlength="32" autocomplete="new-password"
+                                                    autofocus="true">
                                             </div>
                                         </div>
                                         <div class="row">
@@ -1048,5 +1047,4 @@ OB_end_flush();
         </div>
     </div>
 </body>
-
 </html>

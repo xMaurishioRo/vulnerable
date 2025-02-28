@@ -12,7 +12,7 @@ session_start();
 OB_start();
 require 'conf.php';
 // Regenerar el ID de sesión para evitar session fixation
-session_regenerate_id(true);
+// session_regenerate_id(true);
 
 // Función para hashear contraseñas
 function hashPassword($password)

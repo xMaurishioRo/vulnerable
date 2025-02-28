@@ -1,16 +1,16 @@
 <?php
 // Configuración segura de cookies de sesión
-session_set_cookie_params([
-    'lifetime' => 1800,
-    'path' => '/',
-    'domain' => 'vulnerable-production.up.railway.app', // Cambia esto por tu dominio
-    'secure' => isset($_SERVER['HTTP']),
-    'httponly' => false,
-    'samesite' => 'Strict'
-]);
+// session_set_cookie_params([
+//     'lifetime' => 1800,
+//     'path' => '/',
+//     'domain' => 'vulnerable-production.up.railway.app', // Cambia esto por tu dominio
+//     'secure' => isset($_SERVER['HTTPS']),
+//     'httponly' => false,
+//     'samesite' => 'Strict'
+// ]);
 
 session_start();
-OB_start();
+// OB_start();
 require 'conf.php';
 
 // Regenerar el ID de sesión para evitar session fixation
@@ -150,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['view_comments'])) {
         echo "<script>alert('No hay comentarios.');</script>";
     }
 }
-OB_end_flush();
+// OB_end_flush();
 ?>
 <html lang="en">
 <head>

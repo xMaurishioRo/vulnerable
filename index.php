@@ -40,7 +40,7 @@ function validatePassword($password)
 }
 
 // Regenerar el ID de sesión para evitar session fixation
-session_regenerate_id(true);
+// session_regenerate_id(true);
 
 // Verificación del token CSRF
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

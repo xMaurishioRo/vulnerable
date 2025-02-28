@@ -7,7 +7,7 @@ require 'conf.php';
 session_set_cookie_params([
     'lifetime' => 1800,
     'path' => '/',
-    'domain' => 'vulnerable-production.up.railway.app', // Cambia esto por tu dominio
+    'domain' => 'vulnerable-production.up.railway.app', // Cambia esto por tu dominioo
     'secure' => isset($_SERVER['HTTPS']),
     'httponly' => false,
     'samesite' => 'Strict'

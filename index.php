@@ -1,26 +1,20 @@
 <?php
+session_start();
+OB_start();
+require 'conf.php';
+
 // Configuración segura de cookies de sesión
 session_set_cookie_params([
     'lifetime' => 1800,
     'path' => '/',
-    'domain' => 'https://vulnerable-production.up.railway.app/', // Cambia esto por tu dominio
-    //  https://vulnerable-production.up.railway.app/
+    'domain' => 'https://vulnerable-production.up.railway.app/',
     'secure' => isset($_SERVER['HTTPS']),
     'httponly' => false,
     'samesite' => 'Strict'
 ]);
 
-session_start();
-OB_start();
-require 'conf.php';
-
 // Regenerar el ID de sesión para evitar session fixation
 session_regenerate_id(true);
-
-// Generar un nuevo token CSRF si no existe
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
 
 // Función para hashear contraseñas
 function hashPassword($password)
@@ -51,9 +45,18 @@ function validatePassword($password)
 
 // Verificación del token CSRF
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // echo "Token CSRF enviado: " . $_POST['csrf_token'] . "<br>";
+    // echo "Token CSRF en sesión: " . $_SESSION['csrf_token'] . "<br>";
+
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         die("CSRF token inválido.");
     }
+}
+
+
+// Generar un nuevo token CSRF si no existe
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 // Registro de usuario
@@ -78,11 +81,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                 echo "Registro exitoso.";
             }
         } else {
-            echo ("Contraseña no válida.");
+            echo("Contraseña no válida.");
         }
     } else {
-        echo ("Nombre de usuario no válido.");
+        echo("Nombre de usuario no válido.");
     }
+    
+    
+
+    
 }
 
 // Inicio de sesión
@@ -104,12 +111,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
             $stmt = $conn->prepare("UPDATE users SET login_attempts = 0, last_login_attempt = NULL WHERE id = ?");
             $stmt->bind_param('i', $result['id']);
             $stmt->execute();
-            echo "Inicio de sesión exitoso.";
-        } else {
             $stmt = $conn->prepare("UPDATE users SET login_attempts = login_attempts + 1, last_login_attempt = NOW() WHERE id = ?");
             $stmt->bind_param('i', $result['id']);
             $stmt->execute();
-            echo "Credenciales incorrectas.";
+            echo "Inicio de sesión exitoso.";
+            
         }
     } else {
         echo "Credenciales incorrectas.";
@@ -154,10 +160,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['view_comments'])) {
 OB_end_flush();
 ?>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/x-icon" href="/images/2165674.png">
     <title>ÑO</title>
+
     <style>
         @import url(https://fonts.googleapis.com/css?family=Share+Tech+Mono);
 
@@ -446,8 +453,7 @@ OB_end_flush();
             .box::after,
             .box::before {
                 width: 22px;
-                /* background: url(ver-line-mobile.png) no-repeat center; */
-                background-color: yellow  no-repeat center;
+                background: url(ver-line-mobile.png) no-repeat center;
                 background-size: contain
             }
 
@@ -959,9 +965,13 @@ OB_end_flush();
     </style>
 
     <script>
-        window.console = window.console || function (t) { };
+        window.console = window.console || function(t) {};
     </script>
+
+
+
 </head>
+
 <body translate="no" class="">
     <div class="container on">
         <div class="screen">
@@ -976,7 +986,7 @@ OB_end_flush();
                                     <br>
                                     <br>
                                     <form method="POST">
-                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
+                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
 
                                         <div class="col col__left label">Comments</div>
                                         <div class="col col__center">
@@ -985,37 +995,30 @@ OB_end_flush();
                                         <button type="submit" name="comment_submit" id="comment">Submit</button>
                                     </form>
                                     <form method="POST">
-                                        <button type="submit" name="logout"
-                                            style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">Logout</button>
+                                        <button type="submit" name="logout" style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">Logout</button>
                                     </form>
                                     <form method="POST">
-                                        <button type="submit" name="view_comments"
-                                            style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">View
-                                            My Comments</button>
+                                        <button type="submit" name="view_comments" style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">View My Comments</button>
                                     </form>
                                 <?php else: ?>
                                     <b>Welcome</b> — Please enter your credentials to access the system.
                                     <br>
                                     <br>
                                     <div class="row">
-                                        <button type="button" id="toggleButton"
-                                            style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">[[Register]]</button>
+                                        <button type="button" id="toggleButton" style="border: none; margin: 20px; padding: 10px 40px; width: auto; overflow: visible; outline: 0; cursor: pointer; background: rgba(219, 14, 21, .2); color: inherit; font: inherit; line-height: normal; text-transform: uppercase;">[[Register]]</button>
                                     </div>
-                                    <form method="POST" id="authForm">
+                                    <form method="post" id="authForm">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>">
                                         <div class="row">
                                             <div class="col col__left label">Username</div>
                                             <div class="col col__center">
-                                                <input type="text" id="login" name="username" maxlength="32"
-                                                    required="required" placeholder="" autocomplete="username">
+                                                <input type="text" id="login" name="username" maxlength="32" required="required" placeholder="" autocomplete="username">
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col col__left label">Password</div>
                                             <div class="col col__center">
-                                                <input type="password" id="password" name="password" required="required"
-                                                    placeholder="" data-error="" maxlength="32" autocomplete="new-password"
-                                                    autofocus="true">
+                                                <input type="password" id="password" name="password" required="required" placeholder="" data-error="" maxlength="32" autocomplete="new-password" autofocus="true">
                                             </div>
                                         </div>
                                         <div class="row">
@@ -1023,7 +1026,7 @@ OB_end_flush();
                                         </div>
                                     </form>
                                     <script>
-                                        document.getElementById('toggleButton').addEventListener('click', function () {
+                                        document.getElementById('toggleButton').addEventListener('click', function() {
                                             var submitButton = document.getElementById('submitButton');
                                             var authForm = document.getElementById('authForm');
                                             if (submitButton.name === 'login') {
@@ -1046,4 +1049,5 @@ OB_end_flush();
         </div>
     </div>
 </body>
+
 </html>

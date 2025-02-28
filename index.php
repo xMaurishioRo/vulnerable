@@ -1,13 +1,13 @@
 <?php
-// Configuración segura de cookies de sesión -- ¡ACTIVA ESTO MAUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU!
-// session_set_cookie_params([
-//     'lifetime' => 1800,
-//     'path' => '/',
-//     'domain' => 'vulnerable-production.up.railway.app', // Cambia esto por tu dominioo
-//     'secure' => isset($_SERVER['HTTPS']),
-//     'httponly' => false,
-//     'samesite' => 'Strict'
-// ]);
+// Configuración segura de cookies de sesión
+session_set_cookie_params([
+    'lifetime' => 1800,
+    'path' => '/',
+    'domain' => 'vulnerable-production.up.railway.app', // Cambia esto por tu dominio
+    'secure' => isset($_SERVER['HTTPS']),
+    'httponly' => false,
+    'samesite' => 'Strict'
+]);
 
 session_start();
 OB_start();
@@ -15,6 +15,11 @@ require 'conf.php';
 
 // Regenerar el ID de sesión para evitar session fixation
 session_regenerate_id(true);
+
+// Generar un nuevo token CSRF si no existe
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
 // Función para hashear contraseñas
 function hashPassword($password)
@@ -45,17 +50,9 @@ function validatePassword($password)
 
 // Verificación del token CSRF
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // echo "Token CSRF enviado: " . $_POST['csrf_token'] . "<br>";
-    // echo "Token CSRF en sesión: " . $_SESSION['csrf_token'] . "<br>";
-
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         die("CSRF token inválido.");
     }
-}
-
-// Generar un nuevo token CSRF si no existe
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 // Registro de usuario
@@ -106,10 +103,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
             $stmt = $conn->prepare("UPDATE users SET login_attempts = 0, last_login_attempt = NULL WHERE id = ?");
             $stmt->bind_param('i', $result['id']);
             $stmt->execute();
+            echo "Inicio de sesión exitoso.";
+        } else {
             $stmt = $conn->prepare("UPDATE users SET login_attempts = login_attempts + 1, last_login_attempt = NOW() WHERE id = ?");
             $stmt->bind_param('i', $result['id']);
             $stmt->execute();
-            echo "Inicio de sesión exitoso.";
+            echo "Credenciales incorrectas.";
         }
     } else {
         echo "Credenciales incorrectas.";
@@ -153,7 +152,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['view_comments'])) {
 }
 OB_end_flush();
 ?>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">

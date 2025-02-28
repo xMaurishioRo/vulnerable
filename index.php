@@ -1,8 +1,4 @@
 <?php
-// session_start();
-// OB_start();
-require 'conf.php';
-
 // Configuración segura de cookies de sesión
 session_set_cookie_params([
     'lifetime' => 1800,
@@ -12,7 +8,9 @@ session_set_cookie_params([
     'httponly' => false,
     'samesite' => 'Strict'
 ]);
-
+session_start();
+OB_start();
+require 'conf.php';
 // Regenerar el ID de sesión para evitar session fixation
 session_regenerate_id(true);
 
@@ -157,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['view_comments'])) {
         echo "<script>alert('No hay comentarios.');</script>";
     }
 }
-// OB_end_flush();
+OB_end_flush();
 ?>
 <html lang="en">
 

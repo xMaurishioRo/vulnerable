@@ -1,5 +1,5 @@
 <?php
-session_start();
+// session_start();
 OB_start();
 require 'conf.php';
 
@@ -454,7 +454,8 @@ OB_end_flush();
             .box::after,
             .box::before {
                 width: 22px;
-                background: url(ver-line-mobile.png) no-repeat center;
+                /* background: url(ver-line-mobile.png) no-repeat center; */
+                background-color: yellow  no-repeat center;
                 background-size: contain
             }
 

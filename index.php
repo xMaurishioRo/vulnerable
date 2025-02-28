@@ -11,8 +11,6 @@ session_set_cookie_params([
 session_start();
 OB_start();
 require 'conf.php';
-// Regenerar el ID de sesión para evitar session fixation
-// session_regenerate_id(true);
 
 // Función para hashear contraseñas
 function hashPassword($password)
@@ -40,6 +38,9 @@ function validatePassword($password)
 {
     return strlen($password) >= 8 && strlen($password) <= 32;
 }
+
+// Regenerar el ID de sesión para evitar session fixation
+session_regenerate_id(true);
 
 // Verificación del token CSRF
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

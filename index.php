@@ -1,9 +1,5 @@
 <?php
-// session_start();
-OB_start();
-require 'conf.php';
-
-// Configuración segura de cookies de sesión -- ¡ACTIVA ESTO MAUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU!
+// Configuración segura de cookies de sesión -- ¡ACTIVA ESTO MAUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU!
 session_set_cookie_params([
     'lifetime' => 1800,
     'path' => '/',
@@ -12,6 +8,10 @@ session_set_cookie_params([
     'httponly' => false,
     'samesite' => 'Strict'
 ]);
+
+session_start();
+OB_start();
+require 'conf.php';
 
 // Regenerar el ID de sesión para evitar session fixation
 session_regenerate_id(true);
@@ -53,7 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-
 // Generar un nuevo token CSRF si no existe
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -86,10 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     } else {
         echo ("Nombre de usuario no válido.");
     }
-
-
-
-
 }
 
 // Inicio de sesión
@@ -115,7 +110,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
             $stmt->bind_param('i', $result['id']);
             $stmt->execute();
             echo "Inicio de sesión exitoso.";
-
         }
     } else {
         echo "Credenciales incorrectas.";
@@ -159,13 +153,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['view_comments'])) {
 }
 OB_end_flush();
 ?>
-<html lang="en">
 
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/x-icon" href="/images/2165674.png">
     <title>ÑO</title>
-
     <style>
         @import url(https://fonts.googleapis.com/css?family=Share+Tech+Mono);
 
